@@ -1,0 +1,4 @@
+interface:
+  display_name: "Email Triage"
+  short_description: "Review important email with resumable coverage checkpoints"
+  default_prompt: "Use $email-triage to review my Outlook, Gmail, or Feishu Mail for important information and suitable opportunities, resuming from the last fully checked time boundary."

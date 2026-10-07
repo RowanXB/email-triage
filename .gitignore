@@ -1,0 +1,19 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+
+# Runtime state and private review artifacts do not belong in this repository.
+.local/
+state/
+checkpoints/
+reports/
+exports/
+attachments/
+logs/
+tmp/
+.checkpoint-*
+*.lock
