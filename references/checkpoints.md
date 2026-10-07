@@ -55,6 +55,8 @@ Only add keys when `--report-ready` is true (also allowed for a partial report).
 
 ## Account Inventory
 
+For first-time setup, see the fictional [account template](../assets/accounts.example.json) and [registration walkthrough](../README.md#first-time-account-setup). Keep the distributed template unchanged; use `register` to populate private state, not a copy that overwrites an existing index. Example entries are not live accounts and must never seed coverage dates.
+
 `scripts/accounts.py` maintains `accounts.json` in the same private state directory. It requires Python 3.9+ and uses standard-library `zoneinfo` for Markdown display. The index contains provider, canonical account identity, optional human-readable label, and registered scope strings. It never stores coverage dates or copies checkpoint status. Unlike the hashed checkpoint filenames, this file contains readable mailbox identities: keep it private, outside repositories, and do not share its output publicly.
 
 Register identities explicitly supplied by the user or discovered through authorized tools. This records a known account, not verified current access or permission to review it. Preserve the identity already used by a checkpoint; do not register a known alias as a separate mailbox. Existing hashed filenames cannot be reversed to discover unknown accounts. Do not infer an exhaustive inventory from them or automatically fill addresses from unrelated personal history.

@@ -44,6 +44,22 @@ class AccountTests(unittest.TestCase):
         self.assertEqual(self.listing(), {"accounts": []})
         self.assertFalse(self.root.exists())
 
+    def test_example_inventory_is_portable_and_unchecked(self):
+        example = Path(__file__).resolve().parents[1] / "assets" / "accounts.example.json"
+        index = accounts.read_index(example)
+        self.assertEqual(set(index), {"version", "accounts"})
+        self.assertEqual({item["provider"] for item in index["accounts"]}, set(accounts.PROVIDERS))
+        for item in index["accounts"]:
+            self.assertEqual(set(item), {"provider", "account", "label", "scopes"})
+            self.assertTrue(item["account"].endswith("@example.com"))
+            self.assertEqual(item["scopes"], [])
+            self.register("--label", item["label"], provider=item["provider"], account=item["account"])
+        rows = self.listing()["accounts"]
+        self.assertEqual(len(rows), len(index["accounts"]))
+        self.assertTrue(all(row["status"] == "not_checked" and row["covered_through"] is None
+                            and row["initial_since"] is None for row in rows))
+        self.assertEqual(list(self.root.glob("*.json")), [self.index])
+
     def test_register_normalizes_and_merges_without_dates(self):
         self.register("--scope", "received", "--label", "School", account=" Demo@Example.test ")
         self.register("--scope", "topic", "--scope", "received")

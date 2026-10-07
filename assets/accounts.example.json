@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "accounts": [
+    {
+      "provider": "gmail",
+      "account": "personal@example.com",
+      "label": "Personal",
+      "scopes": []
+    },
+    {
+      "provider": "outlook",
+      "account": "work@example.com",
+      "label": "Work or school",
+      "scopes": []
+    },
+    {
+      "provider": "feishu",
+      "account": "employee@example.com",
+      "label": "Personal work mailbox",
+      "scopes": []
+    },
+    {
+      "provider": "feishu",
+      "account": "team@example.com",
+      "label": "Public or shared mailbox",
+      "scopes": []
+    }
+  ]
+}
