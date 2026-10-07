@@ -30,16 +30,19 @@ def digest(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def state_root(args):
+    return Path(args.state_dir).expanduser() if args.state_dir else (
+        Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state")
+        / "email-triage"
+    )
+
+
 def state_path(args):
     account, scope = args.account.strip().casefold(), args.scope.strip()
     if not account or not scope:
         raise ValueError("Account and scope must not be empty")
-    root = Path(args.state_dir).expanduser() if args.state_dir else (
-        Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state")
-        / "email-triage"
-    )
     identity = json.dumps([args.provider, account, scope], separators=(",", ":"))
-    return root / (digest(identity) + ".json")
+    return state_root(args) / (digest(identity) + ".json")
 
 
 @contextmanager

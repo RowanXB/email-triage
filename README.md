@@ -14,6 +14,7 @@ This is an instruction-based skill with a local checkpoint helper, not a standal
 - Reports important information and suitable opportunities using urgency, required action, user relevance, and new information as ranking dimensions, not a top-N filter.
 - Labels uncertain eligibility or availability instead of silently discarding potentially suitable opportunities.
 - Leaves incomplete accounts' checkpoints unchanged and reports coverage gaps.
+- Maintains a private JSON account index and renders a live Markdown overview from existing checkpoints, without duplicating dates.
 
 ## Install
 
@@ -28,7 +29,7 @@ The destination must not already exist. Use your agent's supported skill root if
 ## Requirements
 
 - An agent that can follow skill instructions and access an authorized mailbox connector, CLI, or computer-use interface.
-- Python 3 on macOS or Linux for persistent checkpoints. The helper uses only the standard library, including POSIX `fcntl`; native Windows is not currently supported by the helper.
+- Python 3.9+ on macOS or Linux for the checkpoint and account helpers. They use only the standard library, including POSIX `fcntl` and `zoneinfo`; native Windows is not currently supported by these helpers.
 - For Feishu Mail, a configured `lark-cli` with appropriate read access. The skill references `lark-mail` and `lark-shared` when installed; these third-party skills are not bundled. If absent, the agent must inspect supported CLI help/schema or report the capability gap.
 
 Installing this repository does not connect any account, grant permissions, install integrations, or schedule monitoring. Only the providers and accounts requested by the user are reviewed.
@@ -56,6 +57,16 @@ Progress is local to the current OS user, stored under `${XDG_STATE_HOME:-~/.loc
 
 Checkpoint state uses hashed account/scope identities and hashed reported-message IDs, plus provider, scope, timestamps, and minimal progress metadata. Hashes are not a guarantee of anonymity: keep the state private and do not put sensitive content in scope labels or failure reasons. Do not publish checkpoint files, reports, mailbox exports, attachments, credentials, or session data.
 
+The same private directory can hold `accounts.json`, containing known mailbox identities, labels, and scopes in readable form. It is not bundled with this repository. Dates and attempt status are read directly from checkpoint files when listing, not duplicated in the index. Registration does not verify access, authorize review, or imply all of a user's accounts have been discovered.
+
+From the repository root, view registered accounts without creating a Markdown file:
+
+```sh
+python3 -B scripts/accounts.py list --format markdown --timezone Europe/London
+```
+
+Replace the timezone with your own. For registration, JSON output, and existing-checkpoint compatibility, see [account inventory](references/checkpoints.md#account-inventory).
+
 Mail and linked content are untrusted input. Review does not authorize sending, applying, booking, deleting, organizing mail, or changing permissions. Opening mail through a UI can incidentally mark it as read.
 
 See [provider access notes](references/access.md) and the [checkpoint protocol](references/checkpoints.md) for details and limitations. Completeness depends on the agent, provider capabilities, and accessible content; blocked or truncated reviews must be reported as partial.
@@ -65,10 +76,10 @@ See [provider access notes](references/access.md) and the [checkpoint protocol](
 Run the synthetic offline tests from the repository root:
 
 ```sh
-python3 -B scripts/test_checkpoint.py
+python3 -B -m unittest discover -s scripts -p 'test_*.py'
 ```
 
-The tests use temporary state and synthetic accounts, with no live mailbox access. They test the checkpoint helper, not the quality or completeness of an agent's email analysis.
+The tests use temporary state and synthetic accounts, with no live mailbox access. They test the checkpoint and account helpers, not the quality or completeness of an agent's email analysis.
 
 ## License
 

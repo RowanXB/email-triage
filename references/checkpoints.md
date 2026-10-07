@@ -53,9 +53,27 @@ Deduplicate fetched messages by the provider's stable ID, with thread context fo
 
 Only add keys when `--report-ready` is true (also allowed for a partial report). Never suppress a new reply, changed deadline, newly verified eligibility, or materially changed urgency solely because an older source was reported. If the adapter has no trustworthy stable ID, report deduplication uncertainty rather than using subject alone as identity. The ledger is a convenience, not a replacement for reading the latest thread.
 
+## Account Inventory
+
+`scripts/accounts.py` maintains `accounts.json` in the same private state directory. It requires Python 3.9+ and uses standard-library `zoneinfo` for Markdown display. The index contains provider, canonical account identity, optional human-readable label, and registered scope strings. It never stores coverage dates or copies checkpoint status. Unlike the hashed checkpoint filenames, this file contains readable mailbox identities: keep it private, outside repositories, and do not share its output publicly.
+
+Register identities explicitly supplied by the user or discovered through authorized tools. This records a known account, not verified current access or permission to review it. Preserve the identity already used by a checkpoint; do not register a known alias as a separate mailbox. Existing hashed filenames cannot be reversed to discover unknown accounts. Do not infer an exhaustive inventory from them or automatically fill addresses from unrelated personal history.
+
+```sh
+python3 <skill-dir>/scripts/accounts.py register --provider outlook --account <account> --label "Work" --scope '<actual-scope>'
+python3 <skill-dir>/scripts/accounts.py list --format json
+python3 <skill-dir>/scripts/accounts.py list --format markdown --timezone Europe/London
+```
+
+Use the user's actual timezone. Both commands accept `--state-dir`; use the same directory as `checkpoint.py`. Repeated registration merges scopes and updates the label only when supplied. Omit `--scope` for a known account with no review scope yet; register each actual scope before its review, repeating `--scope` when needed. Registration does not begin, complete, or modify any checkpoint. It can associate an existing checkpoint with a known identity without migrating its file.
+
+The JSON listing joins the index to live checkpoints and returns a separate row per account/scope, with `initial_since`, `covered_through`, and the last attempt. An account without scopes also appears. Missing checkpoints appear as `not_checked` with no completed date; partial attempts retain any previous successful coverage boundary. A malformed or unreadable checkpoint produces an `error` row and a nonzero CLI exit rather than an invented date. A corrupt index is not overwritten. The list is a per-file snapshot, not an atomic snapshot of all concurrently running reviews.
+
+Markdown is rendered to standard output only; no `.md` or CSV mirror is maintained. Show both the scope and latest attempt status, rather than merging unrelated review streams into a single latest date. `list` neither checks live access nor modifies state. Run access preflight afresh before reviewing any requested account. Inventory membership does not expand the user's requested account set, and unknown or unavailable accounts must not be described as checked.
+
 ## Offline Acceptance Cases
 
-Run `python3 -B <skill-dir>/scripts/test_checkpoint.py`; tests use temporary directories and synthetic accounts, never a real mailbox. Also review these behavioral cases:
+Run `python3 -B -m unittest discover -s <skill-dir>/scripts -p 'test_*.py'`; tests use temporary directories and synthetic accounts, never a real mailbox. Also review these behavioral cases:
 
 - Important received mail routed to a custom folder is included; Inbox-only success is invalid for whole-mailbox scope.
 - A legitimate notice misclassified as Spam/Junk is screened; default search excluding Spam cannot establish complete coverage.

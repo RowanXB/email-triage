@@ -10,6 +10,7 @@ __pycache__/
 .local/
 state/
 checkpoints/
+accounts.json
 reports/
 exports/
 attachments/
